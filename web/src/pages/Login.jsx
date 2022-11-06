@@ -1,12 +1,8 @@
-import { useEffect, useState } from "react"
-import { isAuthenticated, setToken } from "../services/auth"
-import { redirect } from 'react-router-dom'
+import { useState } from 'react'
+import { Navigate, Link } from 'react-router-dom'
+import { isAuthenticated, setToken } from '../services/auth'
 
 const Login = () => {
-  if (isAuthenticated()) {
-    return redirect('/')
-  }
-
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
@@ -30,14 +26,14 @@ const Login = () => {
         }
 
         setToken(result.token)
-
-        redirect('/')
       })
       .catch(err => console.log(err))
   }
 
   return (
     <div>
+      {isAuthenticated() && <Navigate to="/" />}
+
       <form onSubmit={login}>
         <div>
           <label htmlFor="email">Email</label>
@@ -51,6 +47,8 @@ const Login = () => {
 
         <input type="submit" value="Acessar" />
       </form>
+
+      <p>Não tem uma conta? <Link to="/register">Cadastre-se</Link></p>
     </div>
   )
 }

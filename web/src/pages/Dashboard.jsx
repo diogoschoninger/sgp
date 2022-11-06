@@ -1,13 +1,12 @@
+import { Navigate } from 'react-router-dom'
 import { isAuthenticated } from '../services/auth'
-import { redirect } from 'react-router-dom'
 
 const Dashboard = () => {
-  if (!isAuthenticated()) {
-    redirect('/login')
-    return
-  }
-
-  return <h1>Dashboard</h1>
+  return (
+    <div>
+      {!isAuthenticated() && <Navigate to="/login" />}
+    </div>
+  )
 }
 
 export default Dashboard

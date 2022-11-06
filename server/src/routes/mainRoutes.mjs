@@ -69,6 +69,38 @@ router.post('/login', async (req, res) => {
   }).end()
 })
 
+router.post('/register', async (req, res) => {
+  let body = req.body
+
+  if (!body.name || !body.email || !body.cpf || !body.password) {
+    return res.status(401).json({
+      error: true,
+      message: "Corpo da requisição inválido. Espera-se nome, email, cpf e senha"
+    }).end()
+  }
+
+  const encryptedPassword = bcrypt.hashSync(body.password)
+
+  let user = await User.create({
+    name: body.name,
+    email: body.email,
+    cpf: body.cpf,
+    password: encryptedPassword
+  })
+
+  if (!user) {
+    return res.json({
+      error: true,
+      message: user
+    }).end()
+  }
+
+  res.status(200).json({
+    registered: true,
+    message: "User registered"
+  }).end()
+})
+
 router.get('/users', verifyJWT, async (req, res) => {
   let users = await User.findAll()
 
