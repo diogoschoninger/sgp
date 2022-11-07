@@ -1,6 +1,7 @@
-import { Sequelize } from 'sequelize'
 import dotenv from 'dotenv'
+import { Sequelize } from 'sequelize'
 
+// Configura o dotenv
 dotenv.config()
 
 // Cria e exporta a conexão com o banco de dados

@@ -1,7 +1,5 @@
-import { DataTypes } from 'sequelize'
-
-// Importa a conexão com o banco de dados
 import { sequelize } from '../connections/mysql.mjs'
+import { DataTypes } from 'sequelize'
 
 // Define e exporta o model User
 const User = sequelize.define('User', {

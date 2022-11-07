@@ -1,8 +1,6 @@
 import { useState } from 'react'
-import { Navigate } from 'react-router-dom'
-import { isAuthenticated, setToken } from '../services/auth'
+import { Link } from 'react-router-dom'
 import { cpf as cpfValidator } from 'cpf-cnpj-validator'
-import { validate as emailValidator } from 'react-email-validator'
 
 const Register = () => {
   const [name, setName] = useState('')
@@ -14,12 +12,8 @@ const Register = () => {
   const [registerSuccess, setRegisterSuccess] = useState(false)
 
   const register = async event => {
+    // Previe o recarregamento da página quando o formulário é submetido
     event.preventDefault()
-
-    // Verifica se o email é válido
-    if (!emailValidator(email)) {
-      return setFormError('Email inválido.')
-    } else setFormError(null)
 
     // Verifica se o CPF é válido
     if (!cpfValidator.isValid(cpf)) {
@@ -31,6 +25,7 @@ const Register = () => {
       return setFormError('As senhas não conferem.')
     } else setFormError(null)
 
+    // Executa a requisição de cadastro ao servidor
     await fetch(`${import.meta.env.VITE_API_URL}/register`, {
       method: 'post',
       headers: {
@@ -45,18 +40,29 @@ const Register = () => {
     })
       .then(result => result.json())
       .then(result => {
+        // Retorna o erro obtido do servidor, caso houver
         if (result.error) {
-          return setFormError(result.message)
+          if (result.type === "SequelizeUniqueConstraintError") {
+            return setFormError(`Este ${result.message.path} já está sendo utilizado por outro usuário`)
+          } else {
+            return setFormError('Ocorreu um erro ao realizar o cadastro. Atualize a página e tente novamente')
+          }
         }
 
-        setRegisterSuccess(true)
+        // Armazena o sucesso do cadastro para uso posterior em feedback ao usuário
+        if (result.registered) {
+          setRegisterSuccess(true)
+        }
+      })
+      .catch(() => {
+        // Retorna um alerta de erro desconhecido
+        return setFormError('Ocorreu um erro ao realizar o cadastro. Atualize a página e tente novamente')
       })
   }
 
   return (
     <div>
-      {isAuthenticated() && <Navigate to="/" />}
-      {registerSuccess && <Navigate to="/" />}
+      <h1>Cadastro de usuário</h1>
 
       <form onSubmit={register}>
         <div>
@@ -66,7 +72,7 @@ const Register = () => {
 
         <div>
           <label htmlFor="email">Email</label>
-          <input id="email" type="text" onChange={e => setEmail(e.target.value)} required></input>
+          <input id="email" type="email" onChange={e => setEmail(e.target.value)} required></input>
         </div>
 
         <div>
@@ -88,6 +94,8 @@ const Register = () => {
 
         <input type="submit" value="Cadastrar" />
       </form>
+
+      {registerSuccess && <p>Usuário cadastrado com sucesso. <Link to="/login">Faça login</Link></p>}
     </div>
   )
 }
