@@ -6,7 +6,6 @@
   "scripts": {
     "dev": "nodemon -e mjs,json src/server.mjs"
   },
-  "keywords": [],
   "author": "Diogo Schoninger (schoninger.diogo@gmail.com)",
   "license": "MIT",
   "dependencies": {
