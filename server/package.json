@@ -2,7 +2,7 @@
   "name": "server",
   "version": "0.1.0-beta",
   "description": "Servidor backend do Sistema de Gerenciamento de Finanças Pessoais",
-  "main": "server.ts",
+  "main": "src/server.mjs",
   "scripts": {
     "dev": "nodemon -e mjs,json src/server.mjs"
   },
