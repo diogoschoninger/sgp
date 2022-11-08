@@ -9,28 +9,17 @@ const router = Router()
 // Função de verificação do token JWT
 const verifyJWT = (req, res, next) => {
   // Obtém o token enviado pelo cabeçalho da requisição
-  const token = req.headers['authorization']
-
-  // Retorna um erro, caso nenhum token for enviado
-  if (!token) {
-    return res.status(401).json({
-      auth: false,
-      message: 'Nenhum token enviado'
-    })
-  }
+  const token = req.headers['authorization-token']
+  const email = req.headers['authorization-email']
 
   // Verifica se o token enviado é válido
   jwt.verify(token, process.env.SERVER_JWT_SECRET, (err, decoded) => {
-    if (err) {
+    if (err || email !== decoded.email) {
       return res.status(401).json({
-        error: true,
-        auth: false,
-        message: "Token de autenticação inválido"
+        invalidToken: true,
+        message: 'Chaves de autenticação inválidas'
       }).end()
     }
-
-    // Salva o email do usuário para uso posterior
-    req.userEmail = decoded.userEmail
 
     // Passa a execução para a próxima função middleware
     next()
@@ -77,16 +66,17 @@ router.post('/login', async (req, res) => {
 
   // Cria o token de autenticação
   const token = jwt.sign(
-    { userEmail: user.email }, // Utiliza o email do usuário
+    { email: user.email }, // Utiliza o email do usuário
     process.env.SERVER_JWT_SECRET, // Chave secreta armazenada em variável de ambiente no servidor
-    { expiresIn: 900 } // Tempo de expiração, em segundos
+    { expiresIn: 1800 } // Tempo de expiração, em segundos
   )
 
   // Retorna o sucesso do login, enviando também o token de autenticação para ser utilizado em requisições futuras
   res.status(200).json({
     auth: true,
     message: "Login efetuado com sucesso",
-    token
+    token,
+    email: user.email
   }).end()
 })
 
@@ -124,6 +114,47 @@ router.post('/register', async (req, res) => {
       message: error.errors[0]
     })
   ))
+})
+
+// Listagem de usuários
+router.get('/users', verifyJWT, async (req, res) => {
+  await User.findAll({
+    attributes: ['id', 'name', 'email', 'cpf']
+  })
+    .then(result => (
+      res.status(200).json({
+        users: result
+      })
+    ))
+    .catch(error => (
+      res.status(404).json({
+        error: true,
+        type: error.name,
+        message: error.errors[0]
+      })
+    ))
+})
+
+// Listagem de usuário por email
+router.get('/users/:email', verifyJWT, async (req, res) => {
+  await User.findOne({
+    attributes: ['id', 'name', 'email', 'cpf'],
+    where: {
+      email: req.params.email
+    }
+  })
+    .then(result => (
+      res.status(200).json({
+        user: result
+      })
+    ))
+    .catch(error => (
+      res.status(404).json({
+        error: true,
+        type: error.name,
+        message: error.errors[0]
+      })
+    ))
 })
 
 export default router

@@ -1,12 +1,11 @@
 import { useState } from 'react'
 import { Navigate, Link } from 'react-router-dom'
-import { isAuthenticated, setToken } from '../services/auth'
+import { getLoggedUserEmail, getLoggedUserToken, setLogin, setLogout } from '../services/auth'
 
 const Login = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [formError, setFormError] = useState(false)
-  const [successLogin, setSuccessLogin] = useState(false)
 
   const login = async (e) => {
     // Previne o recarregamento da página ao submeter o formulário
@@ -29,12 +28,10 @@ const Login = () => {
         if (result.error) {
           return setFormError(result.message)
         }
+        setFormError(false)
 
         // Salva o token de auteticação no armazenamento local do navegador
-        setToken(result.token)
-
-        // Armazena o sucesso do login para uso posterior em redirecionamento de página
-        setSuccessLogin(true)
+        setLogin(result)
       })
       .catch(() => (
         // Retorna um alerta de erro desconhecido
@@ -44,8 +41,7 @@ const Login = () => {
 
   return (
     <div>
-      {/* Redireciona um usuário autenticado à página inicial */}
-      {(isAuthenticated() || successLogin) && <Navigate to="/" />}
+      {(getLoggedUserEmail() && getLoggedUserToken()) && <Navigate to="/" />}
 
       <h1>Login</h1>
 
