@@ -12,18 +12,20 @@ const Register = () => {
   const [registerSuccess, setRegisterSuccess] = useState(false)
 
   const register = async event => {
-    // Previe o recarregamento da página quando o formulário é submetido
+    // Previne o recarregamento da página quando o formulário é submetido
     event.preventDefault()
 
     // Verifica se o CPF é válido
     if (!cpfValidator.isValid(cpf)) {
       return setFormError('CPF inválido.')
-    } else setFormError(null)
+    }
 
     // Verifica se as senhas são iguais
     if (password !== password2) {
       return setFormError('As senhas não conferem.')
-    } else setFormError(null)
+    }
+
+    setFormError(null)
 
     // Executa a requisição de cadastro ao servidor
     await fetch(`${import.meta.env.VITE_API_URL}/register`, {
@@ -93,9 +95,11 @@ const Register = () => {
         {formError && <p style={{ color: '#f00' }}>{formError}</p>}
 
         <input type="submit" value="Cadastrar" />
+
+        <p>Já tem uma conta? <Link to="/login">Faça login</Link></p>
       </form>
 
-      {registerSuccess && <p>Usuário cadastrado com sucesso. <Link to="/login">Faça login</Link></p>}
+      {registerSuccess && <p style={{ color: '#0a0' }}>Usuário cadastrado com sucesso. <Link to="/login">Faça login</Link></p>}
     </div>
   )
 }

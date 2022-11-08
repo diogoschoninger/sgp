@@ -36,11 +36,10 @@ const Dashboard = () => {
       <h1>Dashboard</h1>
 
       {user &&
-        <div>
-          <span>Usuário logado no momento:</span>
-          <h1>{user.name}</h1>
-        </div>
+        <p>Usuário logado no momento: {user.name}</p>
       }
+
+      <button onClick={setLogout}>Sair</button>
     </div>
   )
 }
