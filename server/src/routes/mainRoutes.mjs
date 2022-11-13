@@ -2,6 +2,7 @@ import { Router } from 'express'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
 import User from '../models/User.mjs'
+import FinOperations from '../models/FinOperations.mjs'
 
 // Configurando o router
 const router = Router()
@@ -10,11 +11,11 @@ const router = Router()
 const verifyJWT = (req, res, next) => {
   // Obtém o token enviado pelo cabeçalho da requisição
   const token = req.headers['authorization-token']
-  const email = req.headers['authorization-email']
+  const id = req.headers['authorization-id']
 
   // Verifica se o token enviado é válido
   jwt.verify(token, process.env.SERVER_JWT_SECRET, (err, decoded) => {
-    if (err || email !== decoded.email) {
+    if (err || Number(id) !== decoded.id) {
       return res.status(401).json({
         invalidToken: true,
         message: 'Chaves de autenticação inválidas'
@@ -42,7 +43,7 @@ router.post('/login', async (req, res) => {
 
   // Busca um usuário no banco com email correspondente
   let user = await User.findOne({
-    attributes: ['email', 'password'],
+    attributes: ['id', 'password'],
     where: {
       email: body.email
     }
@@ -66,7 +67,7 @@ router.post('/login', async (req, res) => {
 
   // Cria o token de autenticação
   const token = jwt.sign(
-    { email: user.email }, // Utiliza o email do usuário
+    { id: user.id }, // Utiliza o email do usuário
     process.env.SERVER_JWT_SECRET, // Chave secreta armazenada em variável de ambiente no servidor
     { expiresIn: 1800 } // Tempo de expiração, em segundos
   )
@@ -76,7 +77,7 @@ router.post('/login', async (req, res) => {
     auth: true,
     message: "Login efetuado com sucesso",
     token,
-    email: user.email
+    id: user.id
   }).end()
 })
 
@@ -135,12 +136,12 @@ router.get('/users', verifyJWT, async (req, res) => {
     ))
 })
 
-// Listagem de usuário por email
-router.get('/users/:email', verifyJWT, async (req, res) => {
+// Listagem de usuário por id
+router.get('/users/:id', verifyJWT, async (req, res) => {
   await User.findOne({
     attributes: ['id', 'name', 'email', 'cpf'],
     where: {
-      email: req.params.email
+      id: req.params.id
     }
   })
     .then(result => (
@@ -153,6 +154,27 @@ router.get('/users/:email', verifyJWT, async (req, res) => {
         error: true,
         type: error.name,
         message: error.errors[0]
+      })
+    ))
+})
+
+// Listagem de operações financeiras por usuário
+router.get('/users/:id/fin-operations', verifyJWT, async (req, res) => {
+  await FinOperations.findAll({
+    where: {
+      user_owner: req.params.id
+    }
+  })
+    .then(result => (
+      res.status(200).json({
+        fin_operations: result
+      })
+    ))
+    .catch(error => (
+      res.status(404).json({
+        error: true,
+        type: error.name,
+        error
       })
     ))
 })

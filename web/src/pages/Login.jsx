@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Navigate, Link } from 'react-router-dom'
-import { getLoggedUserEmail, getLoggedUserToken, setLogin } from '../services/auth'
+import { getLoggedUserId, getLoggedUserToken, setLogin } from '../services/auth'
 
 const Login = () => {
   const [email, setEmail] = useState('')
@@ -41,7 +41,7 @@ const Login = () => {
 
   return (
     <div>
-      {(getLoggedUserEmail() && getLoggedUserToken()) && <Navigate to="/" />}
+      {(getLoggedUserToken() && getLoggedUserId()) && <Navigate to="/" />}
 
       <h1>Login</h1>
 
