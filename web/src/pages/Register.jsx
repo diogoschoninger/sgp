@@ -43,18 +43,16 @@ const Register = () => {
       .then(result => result.json())
       .then(result => {
         // Retorna o erro obtido do servidor, caso houver
-        if (result.error) {
-          if (result.type === "SequelizeUniqueConstraintError") {
-            return setFormError(`Este ${result.message.path} já está sendo utilizado por outro usuário`)
+        if (result.errors) {
+          if (result.name === "SequelizeUniqueConstraintError") {
+            return setFormError(`Este ${result.errors[0].path} já está sendo utilizado por outro usuário`)
           } else {
             return setFormError('Ocorreu um erro ao realizar o cadastro. Atualize a página e tente novamente')
           }
         }
 
         // Armazena o sucesso do cadastro para uso posterior em feedback ao usuário
-        if (result.registered) {
-          setRegisterSuccess(true)
-        }
+        setRegisterSuccess(true)
       })
       .catch(() => {
         // Retorna um alerta de erro desconhecido

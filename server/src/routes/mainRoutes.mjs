@@ -16,10 +16,7 @@ const verifyJWT = (req, res, next) => {
   // Verifica se o token enviado é válido
   jwt.verify(token, process.env.SERVER_JWT_SECRET, (err, decoded) => {
     if (err || Number(id) !== decoded.id) {
-      return res.status(401).json({
-        invalidToken: true,
-        message: 'Chaves de autenticação inválidas'
-      }).end()
+      return res.json({ invalidToken: true }).end()
     }
 
     // Passa a execução para a próxima função middleware
@@ -35,7 +32,7 @@ router.post('/login', async (req, res) => {
 
   // Verifica se os dados necessários para o login foram enviados
   if (!body.email || !body.password) {
-    return res.status(401).json({
+    return res.json({
       error: true,
       message: "Dados inexistentes. Espera-se {email, password}"
     }).end()
@@ -51,7 +48,7 @@ router.post('/login', async (req, res) => {
 
   // Caso não exista usuário cadastrado com o email, retorna um erro
   if (!user) {
-    return res.status(404).json({
+    return res.json({
       error: true,
       message: "Nenhum usuário cadastrado com este email"
     }).end()
@@ -59,7 +56,7 @@ router.post('/login', async (req, res) => {
 
   // Compara a senha informada com a senha salva no banco de dados e, caso não corresponda, retorna um erro
   if (!bcrypt.compareSync(body.password, user.password)) {
-    return res.status(404).json({
+    return res.json({
       error: true,
       message: "Senha incorreta"
     }).end()
@@ -73,9 +70,8 @@ router.post('/login', async (req, res) => {
   )
 
   // Retorna o sucesso do login, enviando também o token de autenticação para ser utilizado em requisições futuras
-  res.status(200).json({
+  res.json({
     auth: true,
-    message: "Login efetuado com sucesso",
     token,
     id: user.id
   }).end()
@@ -88,7 +84,7 @@ router.post('/register', async (req, res) => {
 
   // Verifica se os dados necessários para o login foram enviados
   if (!body.name || !body.email || !body.cpf || !body.password) {
-    return res.status(401).json({
+    return res.json({
       error: true,
       message: "Corpo da requisição inválido. Espera-se {name, email, cpf, password}"
     }).end()
@@ -103,18 +99,9 @@ router.post('/register', async (req, res) => {
     email: body.email,
     cpf: body.cpf,
     password: encryptedPassword
-  }).then(user => (
-    res.status(200).json({
-      registered: true,
-      message: 'Usuário cadastrado com sucesso'
-    })
-  )).catch(error => (
-    res.status(406).json({
-      error: true,
-      type: error.name,
-      message: error.errors[0]
-    })
-  ))
+  })
+    .then(result => res.json(result).end())
+    .catch(error => res.json(error).end())
 })
 
 // Listagem de usuários
@@ -122,18 +109,8 @@ router.get('/users', verifyJWT, async (req, res) => {
   await User.findAll({
     attributes: ['id', 'name', 'email', 'cpf']
   })
-    .then(result => (
-      res.status(200).json({
-        users: result
-      })
-    ))
-    .catch(error => (
-      res.status(404).json({
-        error: true,
-        type: error.name,
-        message: error.errors[0]
-      })
-    ))
+    .then(result => res.json(result).end())
+    .catch(error => res.json(error).end())
 })
 
 // Listagem de usuário por id
@@ -144,18 +121,8 @@ router.get('/users/:id', verifyJWT, async (req, res) => {
       id: req.params.id
     }
   })
-    .then(result => (
-      res.status(200).json({
-        user: result
-      })
-    ))
-    .catch(error => (
-      res.status(404).json({
-        error: true,
-        type: error.name,
-        message: error.errors[0]
-      })
-    ))
+    .then(result => res.json(result).end())
+    .catch(error => res.json(error).end())
 })
 
 // Listagem de operações financeiras por usuário
@@ -165,18 +132,8 @@ router.get('/users/:id/fin-operations', verifyJWT, async (req, res) => {
       user_owner: req.params.id
     }
   })
-    .then(result => (
-      res.status(200).json({
-        fin_operations: result
-      })
-    ))
-    .catch(error => (
-      res.status(404).json({
-        error: true,
-        type: error.name,
-        error
-      })
-    ))
+    .then(result => res.json(result).end())
+    .catch(error => res.json(error).end())
 })
 
 export default router

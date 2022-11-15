@@ -1,6 +1,6 @@
 // SERVIÇOS DE VERIFICAÇÃO DE AUTENTICAÇÃO
-export const TOKEN_KEY = 'user-token'
-export const ID_KEY = 'user-id'
+const TOKEN_KEY = 'user-token'
+const ID_KEY = 'user-id'
 
 // Obtém as chaves de autenticação armazenadas no navegador
 export const getLoggedUserToken = () => {

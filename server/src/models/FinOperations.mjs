@@ -17,17 +17,16 @@ const FinOperations = sequelize.define('FinOperations', {
   },
   value: {
     type: DataTypes.INTEGER,
-    allowNull: false,
     defaultValue: 0
   },
   category: {
-    type: DataTypes.INTEGER
+    type: DataTypes.STRING
   },
   side: {
-    type: DataTypes.INTEGER
+    type: DataTypes.STRING
   },
   payment_method: {
-    type: DataTypes.INTEGER
+    type: DataTypes.STRING
   },
   user_owner: {
     type: DataTypes.INTEGER

@@ -31,7 +31,9 @@ const Login = () => {
         setFormError(false)
 
         // Salva o token de auteticação no armazenamento local do navegador
-        setLogin(result)
+        if (result.auth) {
+          setLogin(result)
+        }
       })
       .catch(() => (
         // Retorna um alerta de erro desconhecido

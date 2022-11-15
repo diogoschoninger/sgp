@@ -18,10 +18,10 @@ server.use('/', setHeaders, mainRoutes)
 
 // Definindo a rota "404"
 server.use((req, res) => {
-  res.status(404).send({
+  res.json({
     error: true,
     message: "Este endpoint não existe"
-  })
+  }).end()
 })
 
 // Definindo a porta onde o servidor backend irá executar

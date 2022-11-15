@@ -16,11 +16,9 @@ const Dashboard = () => {
       .then(result => result.json())
       .then(result => {
         if (result.invalidToken) setLogout()
-        setLoggedUser(result.user)
+        setLoggedUser(result)
       })
-      .catch(() => {
-        setLogout()
-      })
+      .catch(() => setLogout())
   }
 
   const getFinOperations = async () => {
@@ -33,11 +31,9 @@ const Dashboard = () => {
       .then(result => result.json())
       .then(result => {
         if (result.invalidToken) setLogout()
-        setFinOperations(result.fin_operations)
+        setFinOperations(result)
       })
-      .catch(() => {
-        setLogout()
-      })
+      .catch(() => setLogout())
   }
 
   useEffect(() => {
@@ -49,46 +45,70 @@ const Dashboard = () => {
     <div>
       {(!getLoggedUserToken() || !getLoggedUserId()) && <Navigate to="/login" />}
 
-      <h1>Dashboard</h1>
-
       {loggedUser &&
-        <p>Usuário logado no momento: {loggedUser.name}</p>
+        <p>Usuário logado no momento: {loggedUser.name} <button onClick={setLogout}>Sair</button></p>
       }
 
-      {finOperations &&
+      <h1>Finanças</h1>
+
+      {/* Exibição dos saldos atuais (dados de exemplo) */}
+      <div style={{ display: 'flex', gap: '1rem' }}>
         <div>
-          <h2>Operações financeiras</h2>
-
-          <table>
-            <thead>
-              <tr>
-                <th>Data</th>
-                <th>Descrição</th>
-                <th>Valor</th>
-                <th>Categoria</th>
-                <th>Lado</th>
-                <th>Forma de pagamento</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {Object.values(finOperations).map(op => (
-                <tr key={op.id}>
-                  <td>{op.date}</td>
-                  <td>{op.description}</td>
-                  <td>{op.value}</td>
-                  <td>{op.category}</td>
-                  <td>{op.side}</td>
-                  <td>{op.payment_method}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <h3>Saldo atual</h3>
+          <span>R$ 1.450,00</span>
         </div>
-      }
+        <div>
+          <h3>Fatura do mês</h3>
+          <span>R$ 750,00</span>
+        </div>
+        <div>
+          <h3>Saldo final</h3>
+          <span>R$ 700,00</span>
+        </div>
+      </div>
 
-      <button onClick={setLogout}>Sair</button>
-    </div>
+      {/* Exibição das movimentações do mês atual */}
+      <div>
+        <h2>Movimentações do mês</h2>
+
+        {!finOperations ? 'Carregando...' :
+          finOperations.length < 1 ? 'Não há movimentações para exibir' :
+            <div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Descrição</th>
+                    <th>Valor</th>
+                    <th>Categoria</th>
+                    <th>Lado</th>
+                    <th>Forma de pagamento</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {Object.values(finOperations).map(op => (
+                    <tr key={op.id}>
+                      <td>{op.date}</td>
+                      <td>{op.description}</td>
+                      <td>{op.value / 100}</td>
+                      <td>{op.category}</td>
+                      <td>{op.side}</td>
+                      <td>{op.payment_method}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+        }
+      </div>
+
+      {/* Exibição da relação de entradas e saídas mensais */}
+      <h2>Relação de entradas e saídas</h2>
+
+      {/* Exibição da variação patrimonial */}
+      <h2>Variação patrimonial</h2>
+    </div >
   )
 }
 
