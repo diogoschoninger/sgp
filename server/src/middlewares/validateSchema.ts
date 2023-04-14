@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 
+import { ValidationError } from '../utils/errors';
+
 const validate =
   ({
     body: bodySchema = Joi.any(),
@@ -26,7 +28,7 @@ const validate =
       return;
     }
 
-    next('Erro de validação');
+    next(new ValidationError({ validations: error.details }));
   };
 
 export default validate;
