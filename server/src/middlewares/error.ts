@@ -1,8 +1,24 @@
 import { NextFunction, Request, Response } from 'express';
 
-import { ValidationError } from '../utils/errors';
+import {
+  AuthenticationError,
+  AuthorizationError,
+  ConflictError,
+  NotFoundError,
+  ValidationError,
+} from '../utils/errors';
 
 const responseMappers: any = {
+  NotFoundError: (error: any) => ({
+    status: 404,
+    body: {
+      statusCode: 404,
+      error: NotFoundError.name,
+      message: error.message,
+      cause: [],
+    },
+  }),
+
   ValidationError: (error: any) => ({
     status: 400,
     body: {
@@ -10,6 +26,46 @@ const responseMappers: any = {
       error: ValidationError.name,
       message: error.message,
       cause: error.validations ?? [],
+    },
+  }),
+
+  ConflictError: (error: any) => ({
+    status: 409,
+    body: {
+      statusCode: 409,
+      error: ConflictError.name,
+      message: error.message,
+      cause: [],
+    },
+  }),
+
+  AuthenticationError: (error: any) => ({
+    status: 401,
+    body: {
+      statusCode: 401,
+      error: AuthenticationError.name,
+      message: error.message,
+      cause: error.cause,
+    },
+  }),
+
+  AuthorizationError: (error: any) => ({
+    status: 403,
+    body: {
+      statusCode: 403,
+      error: AuthorizationError.name,
+      message: error.message,
+      cause: error.cause,
+    },
+  }),
+
+  UnauthorizedError: (error: any) => ({
+    status: 401,
+    body: {
+      statusCode: 401,
+      error: AuthenticationError.name,
+      message: error.message,
+      cause: 'Invalid token',
     },
   }),
 
