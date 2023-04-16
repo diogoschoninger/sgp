@@ -10,6 +10,7 @@ class NotFoundError extends DomainError {
 
   constructor({ resourceName, resourceId }: any) {
     super(`Resource ${resourceName} with identifier ${resourceId} not found.`);
+    this.name = this.constructor.name;
     this.resourceName = resourceName;
     this.resourceId = resourceId;
   }

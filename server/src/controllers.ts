@@ -1,9 +1,11 @@
 import { Request, Response } from 'express';
+import jwt, { Secret } from 'jsonwebtoken';
 
-import { User } from './models';
-import { ConflictError } from './utils/errors';
 import asyncErrorHandler from './middlewares/asyncError';
-import { encrypt } from './utils/auth';
+import { User } from './models';
+import { encrypt, jwtConfig } from './utils/auth';
+import { AuthenticationError, ConflictError } from './utils/errors';
+import safeCompare from './utils/safeCompare';
 
 const controller = {
   publicRoute: (_req: Request, res: Response) => {
@@ -16,28 +18,40 @@ const controller = {
       password: await encrypt(req.body.password),
     };
 
-    const insertedFull = await User.create(user);
-
-    if (!insertedFull)
-      return Promise.reject(
-        new ConflictError(`User with email '${user.email}' already registered`)
-      );
-
-    const { password, ...inserted }: any = insertedFull;
-
-    res.status(201).send(inserted.dataValues);
+    User.create(user)
+      .then((response) => res.status(201).send(response))
+      .catch((error) => {
+        switch (error) {
+          case 'SequelizeUniqueConstraintError':
+            throw new ConflictError(error.errors[0].message);
+          default:
+            throw new Error('Internal error');
+        }
+      });
   }),
 
   login: asyncErrorHandler(async (req: Request, res: Response) => {
-    let user;
+    const { email, password } = req.body;
 
-    const { email, _password } = req.body;
-
-    User.findOne({
+    const { password: userPassword, ...user }: any = await User.findOne({
       where: { email },
-    }).then(console.log);
+    }).then((response) => {
+      if (!response) throw new AuthenticationError('Invalid credentials');
+      return response;
+    });
 
-    res.send();
+    if (!user) throw new AuthenticationError('Invalid credentials');
+
+    const encrypted = await encrypt(password);
+    const isValid = await safeCompare(encrypted, userPassword);
+
+    if (!isValid) throw new AuthenticationError('Invalid credentials');
+
+    const token = jwt.sign(user, jwtConfig.secret as Secret, {
+      expiresIn: jwtConfig.expiration,
+    });
+
+    res.status(200).send({ token });
   }),
 
   hello: (_req: Request, res: Response) => {
