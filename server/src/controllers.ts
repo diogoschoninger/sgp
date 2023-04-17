@@ -33,12 +33,21 @@ const controller = {
   login: asyncErrorHandler(async (req: Request, res: Response) => {
     const { email, password } = req.body;
 
-    const { password: userPassword, ...user }: any = await User.findOne({
+    const {
+      password: userPassword,
+      id,
+      createdAt,
+      updatedAt,
+      deletedAt,
+      ...user
+    }: any = await User.findOne({
       where: { email },
-    }).then((response) => {
-      if (!response) throw new AuthenticationError('Invalid credentials');
-      return response;
-    });
+    })
+      .then((response) => response?.toJSON())
+      .then((response) => {
+        if (!response) throw new AuthenticationError('Invalid credentials');
+        return response;
+      });
 
     if (!user) throw new AuthenticationError('Invalid credentials');
 
@@ -51,7 +60,7 @@ const controller = {
       expiresIn: jwtConfig.expiration,
     });
 
-    res.status(200).send({ token });
+    res.status(200).send({ token, user });
   }),
 
   hello: (_req: Request, res: Response) => {
