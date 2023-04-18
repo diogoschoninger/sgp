@@ -4,7 +4,7 @@ export default {
   register: {
     body: Joi.object({
       name: Joi.string()
-        .regex(/^[A-Za-z\s]+$/)
+        .regex(/^[a-zA-Zà-úÀ-Ú\s]+$/)
         .required(),
       email: Joi.string().email().required(),
       password: Joi.string().min(5).max(255).required(),

@@ -18,16 +18,15 @@ const controller = {
       password: await encrypt(req.body.password),
     };
 
-    User.create(user)
+    return await User.create(user)
       .then((response) => res.status(201).send(response))
-      .catch((error) => {
-        switch (error) {
-          case 'SequelizeUniqueConstraintError':
-            throw new ConflictError(error.errors[0].message);
-          default:
-            throw new Error('Internal error');
-        }
-      });
+      .catch((error) =>
+        Promise.reject(
+          error.name === 'SequelizeUniqueConstraintError'
+            ? new ConflictError('This email is already in use')
+            : error
+        )
+      );
   }),
 
   login: asyncErrorHandler(async (req: Request, res: Response) => {
