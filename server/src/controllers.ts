@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import jwt, { Secret } from 'jsonwebtoken';
 
 import asyncErrorHandler from './middlewares/asyncError';
-import { User } from './models';
+import { FinOperationsGroups, User } from './models';
 import { encrypt, jwtConfig } from './utils/auth';
 import { AuthenticationError, ConflictError } from './utils/errors';
 import safeCompare from './utils/safeCompare';
@@ -61,6 +61,14 @@ const controller = {
 
     res.status(200).send({ token, user });
   }),
+
+  listFinOperationsGroups: asyncErrorHandler(
+    async (req: Request, res: Response) => {
+      FinOperationsGroups.findAll().then((response) =>
+        res.status(200).send(response)
+      );
+    }
+  ),
 
   hello: (_req: Request, res: Response) => {
     res.status(200).send({ message: 'Haha, private route working here' });
