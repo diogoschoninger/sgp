@@ -63,6 +63,7 @@ const Login = () => {
             id="email"
             type="email"
             onChange={(e) => setEmail(e.target.value)}
+            autoFocus
           />
         </div>
         <div>

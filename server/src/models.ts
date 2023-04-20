@@ -27,6 +27,22 @@ export const User = db.define(
   { paranoid: true, tableName: 'users' }
 );
 
+export const FinOperationsPayments = db.define(
+  'FinOperationsPayment',
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    description: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+  },
+  { paranoid: true, tableName: 'fin_operations_payments' }
+);
+
 export const FinOperationsGroups = db.define(
   'FinOperationsGroup',
   {
@@ -40,7 +56,7 @@ export const FinOperationsGroups = db.define(
       allowNull: false,
     },
   },
-  { paranoid: true, tableName: 'fin_operations_group' }
+  { paranoid: true, tableName: 'fin_operations_groups' }
 );
 
 export const FinOperationsSides = db.define(
@@ -56,7 +72,7 @@ export const FinOperationsSides = db.define(
       allowNull: false,
     },
   },
-  { paranoid: true, tableName: 'fin_operations_side' }
+  { paranoid: true, tableName: 'fin_operations_sides' }
 );
 
 export const FinOperations = db.define(

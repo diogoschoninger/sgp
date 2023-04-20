@@ -1,6 +1,7 @@
 import {
   FinOperations,
   FinOperationsGroups,
+  FinOperationsPayments,
   FinOperationsSides,
   User,
 } from '../models';
@@ -12,6 +13,14 @@ const sync = async () => {
       constraint: true,
       foreignKey: {
         name: 'user_owner',
+        allowNull: false,
+      },
+    } as any);
+
+    FinOperations.belongsTo(FinOperationsPayments, {
+      constraint: true,
+      foreignKey: {
+        name: 'payment',
         allowNull: false,
       },
     } as any);

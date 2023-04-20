@@ -9,7 +9,7 @@ const Home = () => {
   const [user, setUser] = useState({} as any);
 
   async function testSession() {
-    await fetch(`${process.env.REACT_APP_SERVER_URL}/private-route`, {
+    await fetch(`${process.env.REACT_APP_SERVER_URL}/finances/operations`, {
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${getToken()}`,

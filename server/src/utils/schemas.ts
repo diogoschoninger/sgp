@@ -17,4 +17,16 @@ export default {
       password: Joi.string().min(5).max(255).required(),
     }),
   },
+
+  createFinOperation: {
+    body: Joi.object({
+      date: Joi.date().required(),
+      description: Joi.string().required(),
+      group: Joi.number().required(),
+      payment: Joi.number().required(),
+      side: Joi.number().required(),
+      value: Joi.string().required(),
+      userOwner: Joi.number().required(),
+    }),
+  },
 };

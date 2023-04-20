@@ -2,16 +2,19 @@ import { Request, Response } from 'express';
 import jwt, { Secret } from 'jsonwebtoken';
 
 import asyncErrorHandler from './middlewares/asyncError';
-import { FinOperationsGroups, User } from './models';
+import {
+  FinOperations,
+  FinOperationsGroups,
+  FinOperationsPayments,
+  FinOperationsSides,
+  User,
+} from './models';
 import { encrypt, jwtConfig } from './utils/auth';
 import { AuthenticationError, ConflictError } from './utils/errors';
 import safeCompare from './utils/safeCompare';
 
 const controller = {
-  publicRoute: (_req: Request, res: Response) => {
-    res.status(200).send({ message: 'Hello. This endpoint is public.' });
-  },
-
+  // SESSÃO
   register: asyncErrorHandler(async (req: Request, res: Response) => {
     const user = {
       ...req.body,
@@ -28,13 +31,11 @@ const controller = {
         )
       );
   }),
-
   login: asyncErrorHandler(async (req: Request, res: Response) => {
     const { email, password } = req.body;
 
     const {
       password: userPassword,
-      id,
       createdAt,
       updatedAt,
       deletedAt,
@@ -62,17 +63,39 @@ const controller = {
     res.status(200).send({ token, user });
   }),
 
+  // MOVIMENTAÇÕES
+  createFinOperation: asyncErrorHandler(async (req: Request, res: Response) => {
+    const body = req.body;
+
+    res.status(200).send(body);
+  }),
+
+  // FORMAS DE PAGAMENTO
+  listFinOperationsPayments: asyncErrorHandler(
+    async (_req: Request, res: Response) => {
+      FinOperationsPayments.findAll().then((response) =>
+        res.status(200).send(response)
+      );
+    }
+  ),
+
+  // GRUPOS DE MOVIMENTAÇÕES
   listFinOperationsGroups: asyncErrorHandler(
-    async (req: Request, res: Response) => {
+    async (_req: Request, res: Response) => {
       FinOperationsGroups.findAll().then((response) =>
         res.status(200).send(response)
       );
     }
   ),
 
-  hello: (_req: Request, res: Response) => {
-    res.status(200).send({ message: 'Haha, private route working here' });
-  },
+  // LADOS DAS MOVIMENTAÇÕES
+  listFinOperationsSides: asyncErrorHandler(
+    async (req: Request, res: Response) => {
+      FinOperationsSides.findAll().then((response) =>
+        res.status(200).send(response)
+      );
+    }
+  ),
 };
 
 export default controller;
