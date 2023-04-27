@@ -7,8 +7,6 @@ import headers from '../services/headers';
 const Login = () => {
   const [isAuth, setIsAuth] = useState<Boolean>(false);
 
-  const [loginError, setLoginError] = useState<String | null>(null);
-
   const [email, setEmail] = useState<String>('');
   const [password, setPassword] = useState<String>('');
 
@@ -22,22 +20,11 @@ const Login = () => {
     })
       .then((res) => res.json())
       .then((res) => {
-        if (res.error) {
-          switch (res.error) {
-            case 'ValidationError':
-              setLoginError(res.message);
-              break;
-            case 'AuthenticationError':
-              setLoginError(res.cause);
-              break;
-          }
-          return;
-        }
+        if (res.error) return alert(JSON.stringify(res));
 
-        setLoginError(null);
-
-        setLogin(res.token, res.user);
+        setLogin(res.token, res.user[0]);
         setIsAuth(true);
+        alert('Usuário autenticado!');
       });
   }
 
@@ -52,10 +39,6 @@ const Login = () => {
 
       <h1>Login</h1>
 
-      {loginError ? (
-        <div style={{ border: '1px solid red' }}>{loginError}</div>
-      ) : null}
-
       <form onSubmit={(e) => login(e)}>
         <div>
           <label htmlFor="email">Email</label>
@@ -64,6 +47,7 @@ const Login = () => {
             type="email"
             onChange={(e) => setEmail(e.target.value)}
             autoFocus
+            required
           />
         </div>
         <div>
@@ -74,6 +58,7 @@ const Login = () => {
             minLength={5}
             maxLength={255}
             onChange={(e) => setPassword(e.target.value)}
+            required
           />
         </div>
         <div>

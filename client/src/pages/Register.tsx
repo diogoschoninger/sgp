@@ -9,14 +9,10 @@ const Register = () => {
   const [password, setPassword] = useState<String>('');
   const [confirmPassword, setConfirmPassword] = useState<String>('');
 
-  const [formSuccess, setFormSuccess] = useState<String | null>(null);
-  const [formError, setFormError] = useState<String | null>(null);
-
   function register(event: FormEvent) {
     event.preventDefault();
 
-    if (password !== confirmPassword)
-      return setFormError('As senhas não coincidem');
+    if (password !== confirmPassword) return alert('As senhas não coincidem');
 
     fetch(`${process.env.REACT_APP_SERVER_URL}/register`, {
       method: 'POST',
@@ -25,45 +21,17 @@ const Register = () => {
     })
       .then((res) => res.json())
       .then((res) => {
-        if (res.error) {
-          setFormSuccess(null);
-
-          switch (res.error) {
-            case 'ConflictError':
-              setFormError('Este email já está sendo utilizado, tente outro');
-              break;
-            default:
-              setFormError('Ocorreu um erro, tente novamente');
-              console.error(res);
-              break;
-          }
-
-          return;
-        }
-
-        setFormError(null);
-
-        setFormSuccess(`Cadastro realizado`);
+        if (res.error) return alert(JSON.stringify(res));
+        alert('Usuário criado com sucesso!');
       })
       .catch((err) => {
-        setFormSuccess(null);
-        setFormError('Ocorreu um erro, tente novamente');
+        alert('Ocorreu um erro, tente novamente');
         console.error(err);
       });
   }
   return (
     <>
       <h1>Cadastro</h1>
-
-      {formError ? (
-        <span style={{ border: '1px solid red' }}>{formError}</span>
-      ) : null}
-
-      {formSuccess ? (
-        <span style={{ border: '1px solid green' }}>
-          {formSuccess as String}
-        </span>
-      ) : null}
 
       <form onSubmit={(e) => register(e)}>
         <div>

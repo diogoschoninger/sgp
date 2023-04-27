@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 
 import { getToken, getUser, setLogout } from '../../../services/auth';
 
@@ -105,8 +105,7 @@ const New = () => {
           return;
         }
 
-        console.log(res);
-        // setSides(res);
+        alert('Movimentação cadastrada com sucesso!');
       })
       .catch((err) => console.error(err));
   }
@@ -121,6 +120,8 @@ const New = () => {
   return (
     <>
       {!isAuth ? <Navigate to="/login" /> : null}
+
+      <Link to="/">Página inicial</Link>
 
       <form onSubmit={(e) => register(e)}>
         <div>

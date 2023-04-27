@@ -2,7 +2,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
 
-import syncDatabase from './db/sync';
+import db from './db/config';
 import errorHandler from './middlewares/error';
 import routes from './routes';
 
@@ -29,4 +29,9 @@ app.listen(process.env.PORT, () => {
   console.log(`Server started on port ${process.env.PORT}`);
 });
 
-syncDatabase();
+try {
+  db.sync();
+  console.log('Database has been successfully synchronized');
+} catch (error) {
+  console.error(error);
+}
