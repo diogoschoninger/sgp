@@ -20,13 +20,19 @@ export default {
 
   createFinOperation: {
     body: Joi.object({
-      date: Joi.date().required(),
       description: Joi.string().required(),
-      group: Joi.number().required(),
-      payment: Joi.number().required(),
-      side: Joi.number().required(),
       value: Joi.string().required(),
-      userOwner: Joi.number().required(),
+      date: Joi.date().required(),
+      user_owner: Joi.number().required(),
+      payment: Joi.number().required(),
+      group: Joi.number().required(),
+      side: Joi.number().required(),
+    }).or('group'),
+  },
+
+  listFinOperations: {
+    body: Joi.object({
+      user_id: Joi.number().required(),
     }),
   },
 };

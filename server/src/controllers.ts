@@ -7,6 +7,7 @@ import asyncErrorHandler from './middlewares/asyncError';
 import { encrypt, jwtConfig } from './utils/auth';
 import { AuthenticationError } from './utils/errors';
 import safeCompare from './utils/safeCompare';
+import stringToNumber from './utils/stringToNumber';
 
 const controller = {
   // SESSÃO
@@ -45,6 +46,74 @@ const controller = {
     });
 
     res.status(200).send({ token, user });
+  }),
+
+  // DADOS DAS MOVIMENTAÇÕES FINANCEIRAS
+  listFinOperationsPayments: asyncErrorHandler(
+    async (req: Request, res: Response) => {
+      const data: any = await db.query(
+        'SELECT * FROM fin_operations_payments',
+        { type: QueryTypes.SELECT }
+      );
+
+      res.status(200).send(data);
+    }
+  ),
+
+  listFinOperationsGroups: asyncErrorHandler(
+    async (req: Request, res: Response) => {
+      const data: any = await db.query('SELECT * FROM fin_operations_groups', {
+        type: QueryTypes.SELECT,
+      });
+
+      res.status(200).send(data);
+    }
+  ),
+
+  listFinOperationsSides: asyncErrorHandler(
+    async (req: Request, res: Response) => {
+      const data: any = await db.query('SELECT * FROM fin_operations_sides', {
+        type: QueryTypes.SELECT,
+      });
+
+      res.status(200).send(data);
+    }
+  ),
+
+  // MOVIMENTAÇÕES FINANCEIRAS
+  createFinOperation: asyncErrorHandler(async (req: Request, res: Response) => {
+    const body = req.body;
+
+    body.value = stringToNumber(body.value);
+
+    await db.query(
+      `INSERT INTO fin_operations (description, value, date, user_owner, payment, \`group\`, side) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      {
+        replacements: [
+          body.description,
+          body.value,
+          body.date,
+          body.user_owner,
+          body.payment,
+          body.group,
+          body.side,
+        ],
+        type: QueryTypes.INSERT,
+      }
+    );
+
+    res.status(201).send({ success: true });
+  }),
+
+  listFinOperations: asyncErrorHandler(async (req: Request, res: Response) => {
+    const user_id = req.body.user_id;
+
+    const data = await db.query(
+      'SELECT * FROM fin_operations WHERE user_owner = ? ORDER BY date, createdAt',
+      { replacements: [user_id], type: QueryTypes.SELECT }
+    );
+
+    res.status(200).send(data);
   }),
 };
 

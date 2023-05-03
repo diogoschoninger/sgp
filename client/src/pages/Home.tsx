@@ -6,29 +6,41 @@ import { getToken, getUser, setLogout } from '../services/auth';
 const Home = () => {
   const [isAuth, setIsAuth] = useState(true);
 
-  const [user, setUser] = useState({} as any);
+  const [user, setUser] = useState<any>({});
+  const [finOperations, setFinOperations] = useState<any>([]);
 
-  async function testSession() {
-    await fetch(`${process.env.REACT_APP_SERVER_URL}/finances/operations`, {
+  async function listFinOperations() {
+
+    fetch(`${process.env.REACT_APP_SERVER_URL}/finances/operations/list`, {
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${getToken()}`,
       },
+      body: JSON.stringify({
+        user_id: JSON.parse(getUser() as string).id
+      }),
     })
       .then((res) => res.json())
       .then((res) => {
-        if (res.statusCode === 401) {
-          setLogout();
-          setIsAuth(false);
-          return;
+        if (res.statusCode) {
+          if (res.statusCode === 401) {
+            setLogout();
+            setIsAuth(false);
+            return;
+          }
+
+          return alert(res.message)
         }
-        setUser(JSON.parse(getUser() as string) ?? {});
-        setIsAuth(true);
-      });
+
+        setFinOperations(res);
+      })
+      .catch((err) => alert(err.message));
   }
 
   useEffect(() => {
-    testSession();
+    setUser(JSON.parse(getUser() as string))
+    listFinOperations();
   }, []);
 
   return (
@@ -70,7 +82,17 @@ const Home = () => {
               <th>Valor</th>
             </tr>
           </thead>
-          <tbody></tbody>
+          <tbody>
+            {finOperations.length < 1 ? (
+              <tr><td colSpan={3}>Nenhuma movimentação cadastrada</td></tr>
+            ) : (finOperations.map((op: any) => (
+              <tr key={op.id}>
+                <td>{op.date}</td>
+                <td>{op.description}</td>
+                <td>{op.value}</td>
+              </tr>
+            )))}
+          </tbody>
         </table>
       </section>
     </>

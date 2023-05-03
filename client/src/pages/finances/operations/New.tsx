@@ -3,7 +3,7 @@ import { Link, Navigate } from 'react-router-dom';
 
 import { getToken, getUser, setLogout } from '../../../services/auth';
 
-const New = () => {
+export default () => {
   const [isAuth, setIsAuth] = useState(true);
   const [user, setUser] = useState<any>();
 
@@ -78,7 +78,7 @@ const New = () => {
       .catch((err) => console.error(err));
   }
 
-  function register(event: FormEvent) {
+  function registerFinanceOperation(event: FormEvent) {
     event.preventDefault();
 
     fetch(`${process.env.REACT_APP_SERVER_URL}/finances/operations`, {
@@ -91,7 +91,7 @@ const New = () => {
         description: formDescription,
         value: formValue,
         date: formDate,
-        userOwner: user.id,
+        user_owner: user.id,
         payment: Number(formPayment),
         group: Number(formGroup),
         side: Number(formSide),
@@ -99,22 +99,26 @@ const New = () => {
     })
       .then((res) => res.json())
       .then((res) => {
-        if (res.statusCode === 401) {
-          setLogout();
-          setIsAuth(false);
-          return;
-        }
+        if (res.statusCode) {
+          if (res.statusCode === 401) {
+            setLogout();
+            setIsAuth(false);
+            return;
+          }
 
+          return alert(res.message)
+        }
         alert('Movimentação cadastrada com sucesso!');
       })
-      .catch((err) => console.error(err));
+      .catch((err) => alert(err.message));
   }
 
   useEffect(() => {
-    setUser(JSON.parse(getUser() as string));
     listPayments();
     listGroups();
     listSides();
+
+    setUser(JSON.parse(getUser() as string));
   }, []);
 
   return (
@@ -123,7 +127,7 @@ const New = () => {
 
       <Link to="/">Página inicial</Link>
 
-      <form onSubmit={(e) => register(e)}>
+      <form onSubmit={(e) => registerFinanceOperation(e)}>
         <div>
           <label htmlFor="date">Data</label>
           <input
@@ -207,5 +211,3 @@ const New = () => {
     </>
   );
 };
-
-export default New;
