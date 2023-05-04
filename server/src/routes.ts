@@ -18,12 +18,7 @@ router.post(
   jwtAuth,
   controller.createFinOperation
 );
-router.post(
-  '/finances/operations/list',
-  validate(schemas.listFinOperations),
-  jwtAuth,
-  controller.listFinOperations
-);
+router.get('/finances/operations', jwtAuth, controller.listFinOperations);
 
 // FORMAS DE PAGAMENTO DAS MOVIMENTAÇÕES
 router.get(

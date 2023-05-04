@@ -106,7 +106,12 @@ const controller = {
   }),
 
   listFinOperations: asyncErrorHandler(async (req: Request, res: Response) => {
-    const user_id = req.body.user_id;
+    const token = req.get('Authorization')?.split(' ')[1];
+    const decoded: any = jwt.verify(
+      token as string,
+      jwtConfig.secret as Secret
+    );
+    const user_id = decoded.id;
 
     const data = await db.query(
       'SELECT * FROM fin_operations WHERE user_owner = ? ORDER BY date, createdAt',

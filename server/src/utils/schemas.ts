@@ -29,10 +29,4 @@ export default {
       side: Joi.number().required(),
     }).or('group'),
   },
-
-  listFinOperations: {
-    body: Joi.object({
-      user_id: Joi.number().required(),
-    }),
-  },
 };

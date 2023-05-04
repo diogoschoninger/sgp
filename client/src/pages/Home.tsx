@@ -11,15 +11,10 @@ const Home = () => {
 
   async function listFinOperations() {
 
-    fetch(`${process.env.REACT_APP_SERVER_URL}/finances/operations/list`, {
-      method: 'POST',
+    fetch(`${process.env.REACT_APP_SERVER_URL}/finances/operations`, {
       headers: {
-        'Content-Type': 'application/json',
         Authorization: `Bearer ${getToken()}`,
-      },
-      body: JSON.stringify({
-        user_id: JSON.parse(getUser() as string).id
-      }),
+      }
     })
       .then((res) => res.json())
       .then((res) => {
