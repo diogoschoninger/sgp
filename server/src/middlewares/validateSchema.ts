@@ -3,8 +3,7 @@ import Joi from 'joi';
 
 import { ValidationError } from '../utils/errors';
 
-const validate =
-  ({
+export default ({
     body: bodySchema = Joi.any(),
     params: paramsSchema = Joi.any(),
     query: querySchema = Joi.any(),
@@ -30,5 +29,3 @@ const validate =
 
     next(new ValidationError({ validations: error.details }));
   };
-
-export default validate;

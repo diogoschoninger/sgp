@@ -1,9 +1,10 @@
 import { FormEvent, useState } from 'react';
 import { Link } from 'react-router-dom';
+import Error from '../components/Error';
 
-import headers from '../services/headers';
+export default () => {
+  const [error, setError] = useState<any>(null);
 
-const Register = () => {
   const [name, setName] = useState<String>('');
   const [email, setEmail] = useState<String>('');
   const [password, setPassword] = useState<String>('');
@@ -16,13 +17,18 @@ const Register = () => {
 
     fetch(`${process.env.REACT_APP_SERVER_URL}/register`, {
       method: 'POST',
-      headers,
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({ name, email, password }),
     })
       .then((res) => res.json())
       .then((res) => {
-        if (res.error) return alert(JSON.stringify(res));
-        alert('Usuário criado com sucesso!');
+        if (res.error) {
+          setError(res);
+          return;
+        }
+        return alert('Usuário criado com sucesso!');
       })
       .catch((err) => {
         alert('Ocorreu um erro, tente novamente');
@@ -40,6 +46,7 @@ const Register = () => {
             type="text"
             id="name"
             onChange={(e) => setName(e.target.value)}
+            required
           />
         </div>
         <div>
@@ -48,6 +55,7 @@ const Register = () => {
             type="email"
             id="email"
             onChange={(e) => setEmail(e.target.value)}
+            required
           />
         </div>
         <div>
@@ -56,6 +64,7 @@ const Register = () => {
             type="password"
             id="password"
             onChange={(e) => setPassword(e.target.value)}
+            required
           />
         </div>
         <div>
@@ -64,8 +73,12 @@ const Register = () => {
             type="password"
             id="confirmPassword"
             onChange={(e) => setConfirmPassword(e.target.value)}
+            required
           />
         </div>
+
+        {error ? <Error error={error} /> : null}
+
         <div>
           <button type="submit">Cadastrar</button>
         </div>
@@ -75,5 +88,3 @@ const Register = () => {
     </>
   );
 };
-
-export default Register;

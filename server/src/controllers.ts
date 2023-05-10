@@ -9,7 +9,7 @@ import { AuthenticationError } from './utils/errors';
 import safeCompare from './utils/safeCompare';
 import stringToNumber from './utils/stringToNumber';
 
-const controller = {
+export default {
   // SESSÃO
   register: asyncErrorHandler(async (req: Request, res: Response) => {
     const user = {
@@ -25,32 +25,41 @@ const controller = {
       }
     );
 
-    res.status(201).send({ message: 'Created' });
+    res.status(201).send({});
   }),
 
   login: asyncErrorHandler(async (req: Request, res: Response) => {
     const { email, password } = req.body;
 
-    const [user, _metadata]: any = await db.query(
+    const [result, _metadata]: any = await db.query(
       `SELECT * FROM users WHERE email LIKE "${email}"`
     );
-    if (user.length < 1) throw new AuthenticationError('Invalid credentials');
+
+    if (result.length < 1)
+      throw new AuthenticationError('Credenciais inválidas');
+
+    const { password: userPassword, ...user } = result[0];
 
     const encrypted = await encrypt(password);
-    const isValid = await safeCompare(encrypted, user[0].password);
 
-    if (!isValid) throw new AuthenticationError('Invalid credentials');
+    const isValid = await safeCompare(encrypted, userPassword);
 
-    const token = jwt.sign(user[0], jwtConfig.secret as Secret, {
+    if (!isValid) throw new AuthenticationError('Credenciais inválidas');
+
+    const token = jwt.sign(user, jwtConfig.secret as Secret, {
       expiresIn: jwtConfig.expiration,
     });
 
     res.status(200).send({ token, user });
   }),
 
+  verifySession: asyncErrorHandler(async (req: Request, res: Response) => {
+    res.status(200).send({ authenticated: true });
+  }),
+
   // DADOS DAS MOVIMENTAÇÕES FINANCEIRAS
   listFinOperationsPayments: asyncErrorHandler(
-    async (req: Request, res: Response) => {
+    async (_req: Request, res: Response) => {
       const data: any = await db.query(
         'SELECT * FROM fin_operations_payments',
         { type: QueryTypes.SELECT }
@@ -61,7 +70,7 @@ const controller = {
   ),
 
   listFinOperationsGroups: asyncErrorHandler(
-    async (req: Request, res: Response) => {
+    async (_req: Request, res: Response) => {
       const data: any = await db.query('SELECT * FROM fin_operations_groups', {
         type: QueryTypes.SELECT,
       });
@@ -71,7 +80,7 @@ const controller = {
   ),
 
   listFinOperationsSides: asyncErrorHandler(
-    async (req: Request, res: Response) => {
+    async (_req: Request, res: Response) => {
       const data: any = await db.query('SELECT * FROM fin_operations_sides', {
         type: QueryTypes.SELECT,
       });
@@ -87,7 +96,7 @@ const controller = {
     body.value = stringToNumber(body.value);
 
     await db.query(
-      `INSERT INTO fin_operations (description, value, date, user_owner, payment, \`group\`, side) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO fin_operations (description, value, date, user_owner, payment, \`group\`, side, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
       {
         replacements: [
           body.description,
@@ -102,7 +111,7 @@ const controller = {
       }
     );
 
-    res.status(201).send({ success: true });
+    res.status(201).send({});
   }),
 
   listFinOperations: asyncErrorHandler(async (req: Request, res: Response) => {
@@ -114,12 +123,10 @@ const controller = {
     const user_id = decoded.id;
 
     const data = await db.query(
-      'SELECT * FROM fin_operations WHERE user_owner = ? ORDER BY date, createdAt',
+      'SELECT * FROM fin_operations WHERE user_owner = ? ORDER BY date, created_at',
       { replacements: [user_id], type: QueryTypes.SELECT }
     );
 
     res.status(200).send(data);
   }),
 };
-
-export default controller;

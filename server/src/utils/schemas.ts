@@ -27,6 +27,6 @@ export default {
       payment: Joi.number().required(),
       group: Joi.number().required(),
       side: Joi.number().required(),
-    }).or('group'),
+    }),
   },
 };

@@ -1,11 +1,14 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 
-import { getToken, getUser, setLogout } from '../../../services/auth';
+import Error from '../../../components/Error';
+import Header from '../../../components/Header';
+import { getLoggedUser, setLogout } from '../../../services/auth';
 
 export default () => {
-  const [isAuth, setIsAuth] = useState(true);
-  const [user, setUser] = useState<any>();
+  const [user, setUser] = useState<any>(JSON.parse(getLoggedUser() as string));
+
+  const [error, setError] = useState<any>(null);
 
   const [formDate, setFormDate] = useState<any>();
   const [formDescription, setFormDescription] = useState<any>();
@@ -19,19 +22,16 @@ export default () => {
   const [sides, setSides] = useState<any>();
 
   function listPayments() {
+    if (!user) return;
+
     fetch(`${process.env.REACT_APP_SERVER_URL}/finances/operations/payments`, {
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getToken()}`,
+        Authorization: `Bearer ${user.token}`,
       },
     })
       .then((res) => res.json())
       .then((res) => {
-        if (res.statusCode === 401) {
-          setLogout();
-          setIsAuth(false);
-          return;
-        }
+        if (res.error) return setUser(null);
 
         setPayments(res);
       })
@@ -39,19 +39,16 @@ export default () => {
   }
 
   function listGroups() {
+    if (!user) return;
+
     fetch(`${process.env.REACT_APP_SERVER_URL}/finances/operations/groups`, {
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getToken()}`,
+        Authorization: `Bearer ${user.token}`,
       },
     })
       .then((res) => res.json())
       .then((res) => {
-        if (res.statusCode === 401) {
-          setLogout();
-          setIsAuth(false);
-          return;
-        }
+        if (res.error) return setUser(null);
 
         setGroups(res);
       })
@@ -59,19 +56,16 @@ export default () => {
   }
 
   function listSides() {
+    if (!user) return;
+
     fetch(`${process.env.REACT_APP_SERVER_URL}/finances/operations/sides`, {
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getToken()}`,
+        Authorization: `Bearer ${user.token}`,
       },
     })
       .then((res) => res.json())
       .then((res) => {
-        if (res.statusCode === 401) {
-          setLogout();
-          setIsAuth(false);
-          return;
-        }
+        if (res.error) return setUser(null);
 
         setSides(res);
       })
@@ -85,7 +79,7 @@ export default () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${getToken()}`,
+        Authorization: `Bearer ${user.token}`,
       },
       body: JSON.stringify({
         description: formDescription,
@@ -99,31 +93,36 @@ export default () => {
     })
       .then((res) => res.json())
       .then((res) => {
-        if (res.statusCode) {
-          if (res.statusCode === 401) {
-            setLogout();
-            setIsAuth(false);
-            return;
-          }
-
-          return alert(res.message)
+        if (res.error) {
+          setError(res);
+          return;
         }
+
         alert('Movimentação cadastrada com sucesso!');
+        setError(null);
       })
-      .catch((err) => alert(err.message));
+      .catch((err) => {
+        alert('Ocorreu um erro, tente novamente');
+        console.error(err);
+      });
   }
 
   useEffect(() => {
     listPayments();
     listGroups();
     listSides();
-
-    setUser(JSON.parse(getUser() as string));
   }, []);
 
   return (
     <>
-      {!isAuth ? <Navigate to="/login" /> : null}
+      {!user ? (
+        <>
+          {setLogout()}
+          <Navigate to="/login" />
+        </>
+      ) : null}
+
+      <Header />
 
       <Link to="/">Página inicial</Link>
 
@@ -205,6 +204,8 @@ export default () => {
             ))}
           </select>
         </div>
+
+        {error ? <Error error={error} /> : null}
 
         <button type="submit">Cadastrar</button>
       </form>

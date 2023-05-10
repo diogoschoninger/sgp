@@ -1,11 +1,13 @@
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 
-import { setLogin } from '../services/auth';
-import headers from '../services/headers';
+import Error from '../components/Error';
+import { getLoggedUser, setLoggedUser } from '../services/auth';
 
-const Login = () => {
-  const [isAuth, setIsAuth] = useState<Boolean>(false);
+export default () => {
+  const [user, setUser] = useState<any>(JSON.parse(getLoggedUser() as string));
+
+  const [error, setError] = useState<any>(null);
 
   const [email, setEmail] = useState<String>('');
   const [password, setPassword] = useState<String>('');
@@ -14,28 +16,27 @@ const Login = () => {
     event.preventDefault();
 
     fetch(`${process.env.REACT_APP_SERVER_URL}/login`, {
-      method: 'post',
-      headers,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({ email, password }),
     })
       .then((res) => res.json())
       .then((res) => {
-        if (res.error) return alert(JSON.stringify(res));
+        if (res.error) {
+          setError(res);
+          return;
+        }
 
-        setLogin(res.token, res.user[0]);
-        setIsAuth(true);
-        alert('Usuário autenticado!');
+        setLoggedUser({ token: res.token, ...res.user });
+        setUser(res.user);
       });
   }
 
-  useEffect(() => {
-    if (localStorage.getItem('sgp_is_authenticated') === 'true')
-      setIsAuth(true);
-  }, []);
-
   return (
     <>
-      {isAuth ? <Navigate to="/" /> : null}
+      {user ? <Navigate to="/" /> : null}
 
       <h1>Login</h1>
 
@@ -61,6 +62,9 @@ const Login = () => {
             required
           />
         </div>
+
+        {error ? <Error error={error} /> : null}
+
         <div>
           <input type="submit" value="Acessar" />
         </div>
@@ -70,5 +74,3 @@ const Login = () => {
     </>
   );
 };
-
-export default Login;

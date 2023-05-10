@@ -10,15 +10,7 @@ const router = Router();
 // SESSÃO
 router.post('/register', validate(schemas.register), controller.register);
 router.post('/login', validate(schemas.login), controller.login);
-
-// MOVIMENTAÇÕES FINANCEIRAS
-router.post(
-  '/finances/operations',
-  validate(schemas.createFinOperation),
-  jwtAuth,
-  controller.createFinOperation
-);
-router.get('/finances/operations', jwtAuth, controller.listFinOperations);
+router.get('/session/verify', jwtAuth, controller.verifySession);
 
 // FORMAS DE PAGAMENTO DAS MOVIMENTAÇÕES
 router.get(
@@ -40,5 +32,14 @@ router.get(
   jwtAuth,
   controller.listFinOperationsSides
 );
+
+// MOVIMENTAÇÕES FINANCEIRAS
+router.post(
+  '/finances/operations',
+  validate(schemas.createFinOperation),
+  jwtAuth,
+  controller.createFinOperation
+);
+router.get('/finances/operations', jwtAuth, controller.listFinOperations);
 
 export default router;

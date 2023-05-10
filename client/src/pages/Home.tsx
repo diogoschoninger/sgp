@@ -1,32 +1,25 @@
 import { useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 
-import { getToken, getUser, setLogout } from '../services/auth';
+import Header from '../components/Header';
+import { getLoggedUser, setLogout } from '../services/auth';
 
-const Home = () => {
-  const [isAuth, setIsAuth] = useState(true);
+export default () => {
+  const [user, setUser] = useState<any>(JSON.parse(getLoggedUser() as string));
 
-  const [user, setUser] = useState<any>({});
   const [finOperations, setFinOperations] = useState<any>([]);
 
-  async function listFinOperations() {
+  function listFinOperations() {
+    if (!user) return;
 
     fetch(`${process.env.REACT_APP_SERVER_URL}/finances/operations`, {
       headers: {
-        Authorization: `Bearer ${getToken()}`,
-      }
+        Authorization: `Bearer ${user.token}`,
+      },
     })
       .then((res) => res.json())
       .then((res) => {
-        if (res.statusCode) {
-          if (res.statusCode === 401) {
-            setLogout();
-            setIsAuth(false);
-            return;
-          }
-
-          return alert(res.message)
-        }
+        if (res.error) return setUser(null);
 
         setFinOperations(res);
       })
@@ -34,33 +27,19 @@ const Home = () => {
   }
 
   useEffect(() => {
-    setUser(JSON.parse(getUser() as string))
     listFinOperations();
   }, []);
 
   return (
     <>
-      {!isAuth ? <Navigate to="/login" /> : null}
+      {!user ? (
+        <>
+          {setLogout()}
+          <Navigate to="/login" />
+        </>
+      ) : null}
 
-      <header style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <h1>SGP</h1>
-
-        <div style={{ display: 'flex' }}>
-          <div>
-            <li>Nome: {user.name}</li>
-            <li>Email: {user.email}</li>
-          </div>
-
-          <button
-            onClick={() => {
-              setLogout();
-              setIsAuth(false);
-            }}
-          >
-            Sair
-          </button>
-        </div>
-      </header>
+      <Header />
 
       <section>
         <h2>Extrato</h2>
@@ -79,19 +58,21 @@ const Home = () => {
           </thead>
           <tbody>
             {finOperations.length < 1 ? (
-              <tr><td colSpan={3}>Nenhuma movimentação cadastrada</td></tr>
-            ) : (finOperations.map((op: any) => (
-              <tr key={op.id}>
-                <td>{op.date}</td>
-                <td>{op.description}</td>
-                <td>{op.value}</td>
+              <tr>
+                <td colSpan={3}>Nenhuma movimentação cadastrada</td>
               </tr>
-            )))}
+            ) : (
+              finOperations.map((op: any) => (
+                <tr key={op.id}>
+                  <td>{op.date}</td>
+                  <td>{op.description}</td>
+                  <td>{op.value}</td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </section>
     </>
   );
 };
-
-export default Home;
