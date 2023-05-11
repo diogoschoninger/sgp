@@ -21,7 +21,13 @@ export default () => {
   const [groups, setGroups] = useState<any>();
   const [sides, setSides] = useState<any>();
 
+  const [paymentsLoading, setPaymentsLoading] = useState<boolean>(true);
+  const [groupsLoading, setGroupsLoading] = useState<boolean>(true);
+  const [sidesLoading, setSidesLoading] = useState<boolean>(true);
+
   function listPayments() {
+    setPaymentsLoading(true);
+
     if (!user) return;
 
     fetch(`${process.env.REACT_APP_SERVER_URL}/finances/operations/payments`, {
@@ -36,9 +42,13 @@ export default () => {
         setPayments(res);
       })
       .catch((err) => console.error(err));
+
+    setPaymentsLoading(false);
   }
 
   function listGroups() {
+    setGroupsLoading(true);
+
     if (!user) return;
 
     fetch(`${process.env.REACT_APP_SERVER_URL}/finances/operations/groups`, {
@@ -53,9 +63,13 @@ export default () => {
         setGroups(res);
       })
       .catch((err) => console.error(err));
+
+    setGroupsLoading(false);
   }
 
   function listSides() {
+    setSidesLoading(true);
+
     if (!user) return;
 
     fetch(`${process.env.REACT_APP_SERVER_URL}/finances/operations/sides`, {
@@ -70,6 +84,8 @@ export default () => {
         setSides(res);
       })
       .catch((err) => console.error(err));
+
+    setSidesLoading(false);
   }
 
   function registerFinanceOperation(event: FormEvent) {
@@ -124,8 +140,6 @@ export default () => {
 
       <Header />
 
-      <Link to="/">Página inicial</Link>
-
       <form onSubmit={(e) => registerFinanceOperation(e)}>
         <div>
           <label htmlFor="date">Data</label>
@@ -164,12 +178,19 @@ export default () => {
             required
             onChange={(e) => setFormPayment(e.target.value)}
           >
-            <option value="">- Selecione -</option>
-            {payments?.map((payment: any) => (
-              <option key={payment.id} value={payment.id}>
-                {payment.description}
-              </option>
-            ))}
+            {paymentsLoading ? (
+              <option value="">Carregando...</option>
+            ) : (
+              <>
+                <option value="">- Selecione -</option>
+
+                {payments?.map((payment: any) => (
+                  <option key={payment.id} value={payment.id}>
+                    {payment.description}
+                  </option>
+                ))}
+              </>
+            )}
           </select>
         </div>
 
@@ -180,12 +201,19 @@ export default () => {
             required
             onChange={(e) => setFormGroup(e.target.value)}
           >
-            <option value="">- Selecione -</option>
-            {groups?.map((group: any) => (
-              <option key={group.id} value={group.id}>
-                {group.description}
-              </option>
-            ))}
+            {groupsLoading ? (
+              <option value="">Carregando...</option>
+            ) : (
+              <>
+                <option value="">- Selecione -</option>
+
+                {groups?.map((group: any) => (
+                  <option key={group.id} value={group.id}>
+                    {group.description}
+                  </option>
+                ))}
+              </>
+            )}
           </select>
         </div>
 
@@ -196,12 +224,19 @@ export default () => {
             required
             onChange={(e) => setFormSide(e.target.value)}
           >
-            <option value="">- Selecione -</option>
-            {sides?.map((side: any) => (
-              <option key={side.id} value={side.id}>
-                {side.description}
-              </option>
-            ))}
+            {sidesLoading ? (
+              <option value="">Carregando...</option>
+            ) : (
+              <>
+                <option value="">- Selecione -</option>
+
+                {sides?.map((side: any) => (
+                  <option key={side.id} value={side.id}>
+                    {side.description}
+                  </option>
+                ))}
+              </>
+            )}
           </select>
         </div>
 

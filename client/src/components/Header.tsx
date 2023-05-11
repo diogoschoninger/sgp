@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 
 import { getLoggedUser, setLogout } from '../services/auth';
 
@@ -33,14 +33,23 @@ export default () => {
         </>
       ) : null}
 
-      <header style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <h1>SGP</h1>
-
-        <div style={{ display: 'flex' }}>
-          <div>
-            <li>Nome: {user?.name}</li>
-            <li>Email: {user?.email}</li>
+      <header
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          <h1 style={{ margin: 0 }}>SGP</h1>
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            <Link to="/">Página inicial</Link>
+            <Link to="/finances/operations/new">Nova movimentação</Link>
           </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          <span>Usuário logado: {user?.name}</span>
 
           <button
             onClick={() => {

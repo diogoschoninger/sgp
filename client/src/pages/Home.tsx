@@ -3,16 +3,20 @@ import { Link, Navigate } from 'react-router-dom';
 
 import Header from '../components/Header';
 import { getLoggedUser, setLogout } from '../services/auth';
+import numberToBRL from '../services/numberToBRL';
 
 export default () => {
   const [user, setUser] = useState<any>(JSON.parse(getLoggedUser() as string));
 
   const [finOperations, setFinOperations] = useState<any>([]);
+  const [operationsLoading, setOperationsLoading] = useState<boolean>(true);
 
-  function listFinOperations() {
+  async function listFinOperations() {
+    setOperationsLoading(true);
+
     if (!user) return;
 
-    fetch(`${process.env.REACT_APP_SERVER_URL}/finances/operations`, {
+    await fetch(`${process.env.REACT_APP_SERVER_URL}/finances/operations`, {
       headers: {
         Authorization: `Bearer ${user.token}`,
       },
@@ -24,6 +28,8 @@ export default () => {
         setFinOperations(res);
       })
       .catch((err) => alert(err.message));
+
+    setOperationsLoading(false);
   }
 
   useEffect(() => {
@@ -44,10 +50,6 @@ export default () => {
       <section>
         <h2>Extrato</h2>
 
-        <div>
-          <Link to="/finances/operations/new">Nova movimentação</Link>
-        </div>
-
         <table>
           <thead>
             <tr>
@@ -57,7 +59,11 @@ export default () => {
             </tr>
           </thead>
           <tbody>
-            {finOperations.length < 1 ? (
+            {operationsLoading ? (
+              <tr>
+                <td colSpan={3}>Carregando movimentações...</td>
+              </tr>
+            ) : finOperations.length < 1 ? (
               <tr>
                 <td colSpan={3}>Nenhuma movimentação cadastrada</td>
               </tr>
@@ -66,7 +72,7 @@ export default () => {
                 <tr key={op.id}>
                   <td>{op.date}</td>
                   <td>{op.description}</td>
-                  <td>{op.value}</td>
+                  <td>{numberToBRL(op.value)}</td>
                 </tr>
               ))
             )}
